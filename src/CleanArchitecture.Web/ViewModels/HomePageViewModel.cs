@@ -11,10 +11,10 @@ namespace CleanArchitecture.Web.ViewModels
         public string GuestBookName { get; set; }
 
         //and this prop should map to the model 
-        public List<BookeEntryModel> PreviousEntries { get; set; } = new List<BookeEntryModel>();
-        public BookeEntryModel NewEntry { get; internal set; } = new BookeEntryModel();
+        public List<BookEntryModel> PreviousEntries { get; private set; } = new List<BookEntryModel>();
+        public BookEntryModel NewEntry { get; internal set; } = new BookEntryModel();
 
-        public class BookeEntryModel
+        public class BookEntryModel
         {
             public string EmailAddress { get; set; }
 
