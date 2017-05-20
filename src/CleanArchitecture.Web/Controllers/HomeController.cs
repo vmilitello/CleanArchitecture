@@ -5,30 +5,38 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CleanArchitecture.Core.Entities;
 using CleanArchitecture.Web.ViewModels;
+using CleanArchitecture.Core.Interfaces;
 
 namespace CleanArchitecture.Web.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IRepository<GuestBook> _guestBookRepo;
+
+        public HomeController(IRepository<GuestBook> repo)
+        {
+            _guestBookRepo = repo;
+
+        }
         public IActionResult Index()
         {
+            if (!_guestBookRepo.List().Any())
+            {
+                var newGuestBook = new GuestBook() { Name = "My GuestBook" };
+                Func<string, string, Nullable<DateTimeOffset>, GuestBookEntry> newEntry = (mail, message, appDateTime) =>
+                {
+                    var retval = new GuestBookEntry() { EmailAddress = mail, Message = message };
+                    if (appDateTime != null)
+                        retval.DateTimeCreated = appDateTime.Value;
+                    return retval;
+                };
 
-            var Guestbook = new GuestBook() { Name = "My GuestBook" };
-            Func<string, string, Nullable<DateTimeOffset>, GuestBookEntry> newEntry = (mail, message, appDateTime) =>
-               {
-                   var retval = new GuestBookEntry() { EmailAddress = mail, Message = message };
-                   if (appDateTime != null)
-                       retval.DateTimeCreated = appDateTime.Value;
-                   return retval;
-               };
-
-            Guestbook.Entries.Add(newEntry("steve@deviq.com", "Hi", DateTime.UtcNow.AddHours(-2)));
-
-            Guestbook.Entries.Add(newEntry("mark@deviq.com", "Hi", DateTime.UtcNow.AddHours(-2)));
-
-            Guestbook.Entries.Add(newEntry("michelle@deviq.com", "Hi", null));
+                newGuestBook.Entries.Add(newEntry("steve@deviq.com", "Hi", DateTime.UtcNow.AddHours(-2)));
+                _guestBookRepo.Add(newGuestBook);
+            }
 
             var viewmodel = new HomePageViewModel();
+            var Guestbook = _guestBookRepo.GetById(1);
             viewmodel.GuestBookName = Guestbook.Name;
             viewmodel.PreviousEntries.AddRange(Guestbook.Entries);
             return View(viewmodel);
@@ -53,6 +61,22 @@ namespace CleanArchitecture.Web.Controllers
         public IActionResult Error()
         {
             return View();
+        }
+
+        [HttpPost]
+        public IActionResult Index(HomePageViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var guestbook = _guestBookRepo.GetById(1);
+                guestbook.Entries.Add(model.NewEntry);
+
+                _guestBookRepo.Update(guestbook);
+                model.PreviousEntries.Clear();
+                model.PreviousEntries.AddRange(guestbook.Entries);
+
+            }
+            return View(model);
         }
     }
 }
