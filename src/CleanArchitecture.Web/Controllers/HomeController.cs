@@ -72,7 +72,7 @@ namespace CleanArchitecture.Web.Controllers
             {
                 var guestbook = _guestBookRepo.GetById(1);
 
-                guestbook.Add( new GuestBookEntry() { Message = model.NewEntry.Message, EmailAddress = model.NewEntry.EmailAddress, Id = model.NewEntry.Id, DateTimeCreated = DateTime.UtcNow });
+                guestbook.AddEntry( new GuestBookEntry() { Message = model.NewEntry.Message, EmailAddress = model.NewEntry.EmailAddress, Id = model.NewEntry.Id, DateTimeCreated = DateTime.UtcNow });
 
                 _guestBookRepo.Update(guestbook);
                 model.PreviousEntries.Clear();

@@ -12,10 +12,10 @@ namespace CleanArchitecture.Core.Entities
 
         public List<GuestBookEntry> Entries { get; private set; } = new List<GuestBookEntry>();
 
-        public void Add(GuestBookEntry entry)
+        public void AddEntry(GuestBookEntry entry)
         {
             Entries.Add(entry);
-            Events.Add(new GuestBookAddedEvent(this));
+            Events.Add(new EntryAddedEvent( this.Id , entry));
         }
 
     }
