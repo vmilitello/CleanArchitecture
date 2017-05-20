@@ -38,7 +38,7 @@ namespace CleanArchitecture.Web.Controllers
             var viewmodel = new HomePageViewModel();
             var Guestbook = _guestBookRepo.GetById(1);
             viewmodel.GuestBookName = Guestbook.Name;
-            viewmodel.PreviousEntries.AddRange(Guestbook.Entries);
+            viewmodel.PreviousEntries.AddRange(Guestbook.Entries.Select(p=> new HomePageViewModel.BookeEntryModel() { Message = p.Message, DateTimeCreated = p.DateTimeCreated, Id = p.Id, EmailAddress = p.EmailAddress }).ToList());
             return View(viewmodel);
 
         }
@@ -69,11 +69,12 @@ namespace CleanArchitecture.Web.Controllers
             if (ModelState.IsValid)
             {
                 var guestbook = _guestBookRepo.GetById(1);
-                guestbook.Entries.Add(model.NewEntry);
+
+                guestbook.Entries.Add( new GuestBookEntry() { Message = model.NewEntry.Message, EmailAddress = model.NewEntry.EmailAddress, Id = model.NewEntry.Id, DateTimeCreated = DateTime.UtcNow });
 
                 _guestBookRepo.Update(guestbook);
                 model.PreviousEntries.Clear();
-                model.PreviousEntries.AddRange(guestbook.Entries);
+                model.PreviousEntries.AddRange(guestbook.Entries.Select(p => new HomePageViewModel.BookeEntryModel() { Message = p.Message, DateTimeCreated = p.DateTimeCreated, Id = p.Id, EmailAddress = p.EmailAddress }).ToList());
 
             }
             return View(model);
